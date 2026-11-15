@@ -7,42 +7,16 @@
 // ── Shared city list ──────────────────────────────────────────────────────
 // Used for both calibration presets and target presets.
 const CITIES = [
-  // Croatia — major cities
-  { name: 'Zagreb',           lat: 45.8150, lon: 15.9819 },
-  { name: 'Split',            lat: 43.5081, lon: 16.4402 },
-  { name: 'Rijeka',           lat: 45.3271, lon: 14.4422 },
-  { name: 'Osijek',           lat: 45.5511, lon: 18.6939 },
-  { name: 'Zadar',            lat: 44.1194, lon: 15.2314 },
-  { name: 'Pula',             lat: 44.8666, lon: 13.8496 },
-  { name: 'Slavonski Brod',   lat: 45.1600, lon: 18.0158 },
-  { name: 'Karlovac',         lat: 45.4876, lon: 15.5477 },
-  { name: 'Varaždin',         lat: 46.3044, lon: 16.3378 },
-  { name: 'Šibenik',          lat: 43.7350, lon: 15.8952 },
-  { name: 'Sisak',            lat: 45.4696, lon: 16.3754 },
-  { name: 'Dubrovnik',        lat: 42.6507, lon: 18.0944 },
-  { name: 'Bjelovar',         lat: 45.8990, lon: 16.8420 },
-  { name: 'Koprivnica',       lat: 46.1620, lon: 16.8325 },
-  { name: 'Čakovec',          lat: 46.3838, lon: 16.4332 },
-  { name: 'Virovitica',       lat: 45.8319, lon: 17.3844 },
-  { name: 'Požega',           lat: 45.3401, lon: 17.6855 },
-  { name: 'Vukovar',          lat: 45.3516, lon: 18.9994 },
-  { name: 'Nova Gradiška',    lat: 45.2546, lon: 17.3826 },
-  { name: 'Gospić',           lat: 44.5468, lon: 15.3730 },
-  { name: 'Makarska',         lat: 43.2971, lon: 17.0164 },
-  { name: 'Rovinj',           lat: 45.0804, lon: 13.6388 },
-  { name: 'Opatija',          lat: 45.3387, lon: 14.3051 },
-  { name: 'Vinkovci',         lat: 45.2882, lon: 18.8041 },
-  { name: 'Knin',             lat: 44.0414, lon: 16.1975 },
-  { name: 'Petrinja',         lat: 45.4418, lon: 16.2812 },
-  // Neighboring countries — useful calibration anchors near radar edge
-  { name: 'Ljubljana (SI)',   lat: 46.0511, lon: 14.5051 },
-  { name: 'Graz (AT)',        lat: 47.0707, lon: 15.4395 },
-  { name: 'Vienna (AT)',      lat: 48.2082, lon: 16.3738 },
-  { name: 'Budapest (HU)',    lat: 47.4979, lon: 19.0402 },
-  { name: 'Belgrade (RS)',    lat: 44.8176, lon: 20.4633 },
-  { name: 'Sarajevo (BA)',    lat: 43.8563, lon: 18.4131 },
-  { name: 'Trieste (IT)',     lat: 45.6495, lon: 13.7768 },
-  { name: 'Novi Sad (RS)',    lat: 45.2671, lon: 19.8335 },
+  { name: 'Zagreb',      lat: 45.8150, lon: 15.9819 },
+  { name: 'Split',       lat: 43.5081, lon: 16.4402 },
+  { name: 'Rijeka',      lat: 45.3271, lon: 14.4422 },
+  { name: 'Osijek',      lat: 45.5511, lon: 18.6939 },
+  { name: 'Zadar',       lat: 44.1194, lon: 15.2314 },
+  { name: 'Dubrovnik',   lat: 42.6507, lon: 18.0944 },
+  { name: 'Pula',        lat: 44.8666, lon: 13.8496 },
+  { name: 'Varaždin',    lat: 46.3044, lon: 16.3378 },
+  { name: 'Ljubljana',   lat: 46.0511, lon: 14.5051 },
+  { name: 'Sarajevo',    lat: 43.8563, lon: 18.4131 },
 ];
 
 const ConfigUI = (() => {
@@ -64,7 +38,8 @@ const ConfigUI = (() => {
     _setupSriCanvas();
     _setupTargetForm();
     _setupSaveButton();
-    _buildCityPresets();
+    _setupCityAutocomplete('cp-name',  'cp-lat',  'cp-lon');
+    _setupCityAutocomplete('tgt-name', 'tgt-lat', 'tgt-lon');
   }
 
   // ── Tabs ────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@
 
 // ── State ──────────────────────────────────────────────────────────────────
 let map = null;
-let radarCornersSet = false;
+let lastCornersKey = null;
 let currentStatus = null;
 let wsReconnectTimer = null;
 let debugOverlayVisible = false;
@@ -141,10 +141,14 @@ async function refreshMap(status) {
     if (dbgSrc) dbgSrc.updateImage({ url: '/api/radar/debug-frame.png?' + Date.now() });
   }
 
-  // Update corners if geo is ready
-  if (window._radarCorners && !radarCornersSet) {
-    setRadarCorners(window._radarCorners);
-    radarCornersSet = true;
+  // Update corners whenever they change (crop/calibration can change after
+  // the map's first fit, so this must not be a one-time thing).
+  if (window._radarCorners) {
+    const key = JSON.stringify(window._radarCorners);
+    if (key !== lastCornersKey) {
+      setRadarCorners(window._radarCorners);
+      lastCornersKey = key;
+    }
   }
 
   // Target markers

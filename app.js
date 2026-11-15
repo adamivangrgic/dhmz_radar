@@ -55,9 +55,26 @@ function initMap(token, cfg) {
     center: centre,
     zoom: 7,
     attributionControl: true,
+    // Lock to flat Mercator — the radar overlay is a flat raster image and
+    // must not be draped around globe curvature or viewed at a pitch.
+    projection: 'mercator',
+    pitch: 0,
+    maxPitch: 0,
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchPitch: false,
   });
 
-  map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+  // Belt-and-braces: if a style or user interaction ever re-enables globe/pitch,
+  // snap straight back to flat mercator so the overlay stays aligned.
+  map.on('style.load', () => {
+    if (typeof map.setProjection === 'function') map.setProjection('mercator');
+  });
+  map.on('pitchend', () => {
+    if (map.getPitch() !== 0) map.setPitch(0);
+  });
+
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
   map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-right');
 
   map.on('load', () => {

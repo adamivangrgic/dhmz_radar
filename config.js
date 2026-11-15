@@ -4,19 +4,28 @@
 
 'use strict';
 
-// ── Shared city list ──────────────────────────────────────────────────────
-// Used for both calibration presets and target presets.
+// ── Shared city list (20 entries) ─────────────────────────────────────────
 const CITIES = [
-  { name: 'Zagreb',      lat: 45.8150, lon: 15.9819 },
-  { name: 'Split',       lat: 43.5081, lon: 16.4402 },
-  { name: 'Rijeka',      lat: 45.3271, lon: 14.4422 },
-  { name: 'Osijek',      lat: 45.5511, lon: 18.6939 },
-  { name: 'Zadar',       lat: 44.1194, lon: 15.2314 },
-  { name: 'Dubrovnik',   lat: 42.6507, lon: 18.0944 },
-  { name: 'Pula',        lat: 44.8666, lon: 13.8496 },
-  { name: 'Varaždin',    lat: 46.3044, lon: 16.3378 },
-  { name: 'Ljubljana',   lat: 46.0511, lon: 14.5051 },
-  { name: 'Sarajevo',    lat: 43.8563, lon: 18.4131 },
+  { name: 'Zagreb',         lat: 45.8150, lon: 15.9819 },
+  { name: 'Split',          lat: 43.5081, lon: 16.4402 },
+  { name: 'Rijeka',         lat: 45.3271, lon: 14.4422 },
+  { name: 'Osijek',         lat: 45.5511, lon: 18.6939 },
+  { name: 'Zadar',          lat: 44.1194, lon: 15.2314 },
+  { name: 'Pula',           lat: 44.8666, lon: 13.8496 },
+  { name: 'Dubrovnik',      lat: 42.6507, lon: 18.0944 },
+  { name: 'Varaždin',       lat: 46.3044, lon: 16.3378 },
+  { name: 'Slavonski Brod', lat: 45.1600, lon: 18.0158 },
+  { name: 'Karlovac',       lat: 45.4876, lon: 15.5477 },
+  { name: 'Šibenik',        lat: 43.7350, lon: 15.8952 },
+  { name: 'Čakovec',        lat: 46.3838, lon: 16.4332 },
+  { name: 'Vukovar',        lat: 45.3516, lon: 18.9994 },
+  { name: 'Gospić',         lat: 44.5468, lon: 15.3730 },
+  { name: 'Ljubljana',      lat: 46.0511, lon: 14.5051 },
+  { name: 'Graz',           lat: 47.0707, lon: 15.4395 },
+  { name: 'Budapest',       lat: 47.4979, lon: 19.0402 },
+  { name: 'Belgrade',       lat: 44.8176, lon: 20.4633 },
+  { name: 'Sarajevo',       lat: 43.8563, lon: 18.4131 },
+  { name: 'Trieste',        lat: 45.6495, lon: 13.7768 },
 ];
 
 const ConfigUI = (() => {
@@ -42,6 +51,78 @@ const ConfigUI = (() => {
     _setupCityAutocomplete('tgt-name', 'tgt-lat', 'tgt-lon');
   }
 
+  // ── City autocomplete ──────────────────────────────────────────────────
+  // Attaches a dropdown to `nameId` that filters CITIES as you type,
+  // and fills `latId`/`lonId` on selection.
+  function _setupCityAutocomplete(nameId, latId, lonId) {
+    const input = document.getElementById(nameId);
+    if (!input) return;
+
+    // Create dropdown container once
+    const drop = document.createElement('ul');
+    drop.className = 'city-drop';
+    input.parentNode.style.position = 'relative';
+    input.parentNode.appendChild(drop);
+
+    function hide() { drop.innerHTML = ''; drop.classList.remove('open'); }
+
+    function show(matches) {
+      drop.innerHTML = matches.map((c, i) =>
+        `<li data-i="${i}">${c.name}
+           <span class="city-drop-coords">${c.lat.toFixed(2)}, ${c.lon.toFixed(2)}</span>
+         </li>`
+      ).join('');
+      drop.classList.toggle('open', matches.length > 0);
+
+      drop.querySelectorAll('li').forEach(li => {
+        li.addEventListener('mousedown', e => {
+          e.preventDefault();   // don't blur input before we fill it
+          const c = matches[+li.dataset.i];
+          input.value = c.name;
+          document.getElementById(latId).value = c.lat;
+          document.getElementById(lonId).value = c.lon;
+          hide();
+        });
+      });
+    }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      if (!q) { hide(); return; }
+      const hits = CITIES.filter(c => c.name.toLowerCase().includes(q)).slice(0, 6);
+      show(hits);
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) input.dispatchEvent(new Event('input'));
+    });
+
+    input.addEventListener('blur', () => setTimeout(hide, 150));
+
+    // Keyboard navigation
+    input.addEventListener('keydown', e => {
+      const items = drop.querySelectorAll('li');
+      if (!items.length) return;
+      const active = drop.querySelector('li.focused');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = active ? active.nextElementSibling : items[0];
+        active?.classList.remove('focused');
+        next?.classList.add('focused');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = active ? active.previousElementSibling : items[items.length - 1];
+        active?.classList.remove('focused');
+        prev?.classList.add('focused');
+      } else if (e.key === 'Enter' && active) {
+        e.preventDefault();
+        active.dispatchEvent(new MouseEvent('mousedown'));
+      } else if (e.key === 'Escape') {
+        hide();
+      }
+    });
+  }
+
   // ── Tabs ────────────────────────────────────────────────────────────────
   function _setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
@@ -53,39 +134,6 @@ const ConfigUI = (() => {
           ?.classList.add('active');
       });
     });
-  }
-
-  // ── Build city preset buttons from shared CITIES list ──────────────────
-  function _buildCityPresets() {
-    // Calibration presets
-    const calibPresets = document.getElementById('calib-city-presets');
-    if (calibPresets) {
-      calibPresets.innerHTML = CITIES.map(c =>
-        `<button class="preset" data-lat="${c.lat}" data-lon="${c.lon}" data-name="${c.name}">${c.name}</button>`
-      ).join('');
-      calibPresets.querySelectorAll('.preset').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.getElementById('cp-lat').value  = btn.dataset.lat;
-          document.getElementById('cp-lon').value  = btn.dataset.lon;
-          document.getElementById('cp-name').value = btn.dataset.name;
-        });
-      });
-    }
-
-    // Target presets
-    const tgtPresets = document.getElementById('target-city-presets');
-    if (tgtPresets) {
-      tgtPresets.innerHTML = CITIES.map(c =>
-        `<button class="preset" data-lat="${c.lat}" data-lon="${c.lon}" data-name="${c.name}">${c.name}</button>`
-      ).join('');
-      tgtPresets.querySelectorAll('.preset').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.getElementById('tgt-lat').value  = btn.dataset.lat;
-          document.getElementById('tgt-lon').value  = btn.dataset.lon;
-          document.getElementById('tgt-name').value = btn.dataset.name;
-        });
-      });
-    }
   }
 
   // ── Calibration canvas ─────────────────────────────────────────────────

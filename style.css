@@ -253,3 +253,22 @@ code { background: var(--bg3); padding: 1px 5px; border-radius: 3px;
   color: var(--text2); font-size: 11px; border-radius: 4px;
   padding: 2px 4px; cursor: pointer;
 }
+
+/* ── City autocomplete dropdown ──────────────────────────────── */
+.city-drop {
+  display: none; position: absolute; z-index: 200;
+  left: 0; right: 0; top: calc(100% + 2px);
+  background: var(--bg2); border: 1px solid var(--accent);
+  border-radius: var(--radius); margin: 0; padding: 2px 0;
+  list-style: none; max-height: 220px; overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+}
+.city-drop.open { display: block; }
+.city-drop li {
+  padding: 7px 12px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--text);
+}
+.city-drop li:hover,
+.city-drop li.focused { background: var(--bg3); color: var(--accent); }
+.city-drop-coords { font-size: 11px; color: var(--text2); }
